@@ -1,0 +1,697 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Solar Design Generator</title>
+  <style>
+    :root {
+      --bg: #f4f7fb;
+      --panel: #ffffff;
+      --ink: #142033;
+      --muted: #617086;
+      --line: #d7e0eb;
+      --navy: #15314e;
+      --blue: #155e9f;
+      --teal: #0f766e;
+      --green: #e9f9ef;
+      --amber: #fff4d6;
+      --red: #ffe5e5;
+      --rail: #cbd5e1;
+      --module: #1f6fb2;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Tahoma, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--ink);
+      line-height: 1.5;
+    }
+    header {
+      background: var(--navy);
+      color: white;
+      padding: 22px 28px;
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      align-items: center;
+    }
+    h1 { margin: 0; font-size: 24px; }
+    header p { margin: 4px 0 0; color: #dbeafe; }
+    main {
+      display: grid;
+      grid-template-columns: 390px minmax(0, 1fr);
+      gap: 18px;
+      padding: 18px;
+      max-width: 1500px;
+      margin: 0 auto;
+    }
+    section, aside {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+    }
+    aside {
+      padding: 16px;
+      align-self: start;
+      position: sticky;
+      top: 12px;
+      max-height: calc(100vh - 24px);
+      overflow: auto;
+    }
+    .workspace {
+      display: grid;
+      gap: 14px;
+    }
+    .card {
+      padding: 16px;
+    }
+    h2 {
+      margin: 0 0 10px;
+      font-size: 18px;
+      color: var(--blue);
+    }
+    h3 {
+      margin: 14px 0 8px;
+      font-size: 15px;
+      color: var(--navy);
+    }
+    label {
+      display: grid;
+      gap: 4px;
+      font-size: 12px;
+      font-weight: 700;
+      color: #334155;
+    }
+    input, select {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      padding: 8px 9px;
+      font: inherit;
+      background: white;
+    }
+    .input-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+    .full { grid-column: 1 / -1; }
+    button {
+      border: 0;
+      border-radius: 6px;
+      padding: 10px 12px;
+      background: var(--blue);
+      color: white;
+      font-weight: 700;
+      cursor: pointer;
+      font-family: inherit;
+    }
+    button.secondary { background: var(--teal); }
+    button.light {
+      background: #e8eef5;
+      color: #16324f;
+    }
+    .button-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-top: 12px;
+    }
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 10px;
+    }
+    .kpi {
+      background: #f8fafc;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 12px;
+    }
+    .kpi span {
+      display: block;
+      color: var(--muted);
+      font-size: 12px;
+      margin-bottom: 4px;
+    }
+    .kpi strong {
+      font-size: 20px;
+      color: var(--navy);
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+    th, td {
+      border: 1px solid var(--line);
+      padding: 8px;
+      vertical-align: top;
+      text-align: left;
+    }
+    th {
+      background: #e8eef5;
+      color: #16324f;
+    }
+    .status {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-weight: 700;
+      font-size: 12px;
+    }
+    .ok { background: var(--green); color: #166534; }
+    .review { background: var(--amber); color: #7a5a00; }
+    .fail { background: var(--red); color: #9b1c1c; }
+    .layout-wrap {
+      overflow: auto;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #eef3f8;
+      padding: 14px;
+    }
+    .roof {
+      position: relative;
+      min-width: 700px;
+      height: 430px;
+      background:
+        linear-gradient(90deg, rgba(255,255,255,.5) 1px, transparent 1px),
+        linear-gradient(rgba(255,255,255,.5) 1px, transparent 1px),
+        #dbe7f3;
+      background-size: 28px 28px;
+      border: 3px solid #64748b;
+      border-radius: 6px;
+    }
+    .module {
+      position: absolute;
+      background: linear-gradient(135deg, #1f6fb2, #174d7e);
+      border: 1px solid #0d355c;
+      border-radius: 2px;
+      color: white;
+      font-size: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+    .walkway {
+      position: absolute;
+      background: rgba(15, 118, 110, .22);
+      border: 1px dashed var(--teal);
+    }
+    .station {
+      position: absolute;
+      background: #fff7df;
+      border: 2px solid #d69e2e;
+      border-radius: 4px;
+      color: #7a5a00;
+      font-weight: 700;
+      font-size: 11px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 4px;
+    }
+    .legend {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      color: var(--muted);
+      font-size: 12px;
+      margin-top: 8px;
+    }
+    .legend i {
+      display: inline-block;
+      width: 14px;
+      height: 10px;
+      border-radius: 2px;
+      margin-right: 4px;
+      vertical-align: -1px;
+    }
+    textarea {
+      width: 100%;
+      min-height: 220px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 10px;
+      font-family: Consolas, monospace;
+      font-size: 12px;
+    }
+    .note {
+      background: #f8fafc;
+      border-left: 4px solid var(--teal);
+      padding: 10px 12px;
+      border-radius: 6px;
+      color: #334155;
+      font-size: 13px;
+    }
+    @media (max-width: 980px) {
+      main { grid-template-columns: 1fr; }
+      aside { position: static; max-height: none; }
+      .kpi-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div>
+      <h1>Solar Design Generator</h1>
+      <p>ช่วยจัดกลุ่มแผง เลือกอินเวอร์เตอร์/ออปติไมเซอร์ คำนวณสตริง สายไฟ อุปกรณ์ป้องกัน BOQ และรายการตรวจสอบ</p>
+    </div>
+    <button class="secondary" id="runTop">คำนวณใหม่</button>
+  </header>
+
+  <main>
+    <aside>
+      <h2>ข้อมูลตั้งต้น</h2>
+      <div class="input-grid">
+        <label class="full">ชนิดโครงการ
+          <select id="projectType">
+            <option value="rooftop">Solar Rooftop</option>
+            <option value="farm">Solar Farm</option>
+          </select>
+        </label>
+        <label>พื้นที่ใช้ได้ (ตร.ม.)
+          <input id="usableArea" type="number" value="850">
+        </label>
+        <label>ใช้พื้นที่เผื่อ (%) 
+          <input id="areaReserve" type="number" value="28">
+        </label>
+        <label>Module Wp
+          <input id="moduleWp" type="number" value="550">
+        </label>
+        <label>Module กว้าง (ม.)
+          <input id="moduleW" type="number" step="0.01" value="1.13">
+        </label>
+        <label>Module ยาว (ม.)
+          <input id="moduleH" type="number" step="0.01" value="2.28">
+        </label>
+        <label>ต้องการ DC kWp
+          <input id="targetKwp" type="number" value="100">
+        </label>
+        <label>Voc (V)
+          <input id="voc" type="number" step="0.1" value="49.8">
+        </label>
+        <label>Vmp (V)
+          <input id="vmp" type="number" step="0.1" value="41.8">
+        </label>
+        <label>Isc (A)
+          <input id="isc" type="number" step="0.01" value="14.0">
+        </label>
+        <label>Imp (A)
+          <input id="imp" type="number" step="0.01" value="13.16">
+        </label>
+        <label>Temp coeff Voc
+          <input id="vocCoeff" type="number" step="0.0001" value="-0.0028">
+        </label>
+        <label>อุณหภูมิต่ำสุด (°C)
+          <input id="tmin" type="number" value="15">
+        </label>
+        <label>อินเวอร์เตอร์ kW/เครื่อง
+          <input id="invKw" type="number" value="50">
+        </label>
+        <label>Max DC V inverter
+          <input id="maxDcV" type="number" value="1100">
+        </label>
+        <label>MPPT min V
+          <input id="mpptMin" type="number" value="200">
+        </label>
+        <label>MPPT max V
+          <input id="mpptMax" type="number" value="1000">
+        </label>
+        <label>จำนวน MPPT/เครื่อง
+          <input id="mpptCount" type="number" value="5">
+        </label>
+        <label>กระแสสูงสุด/MPPT (A)
+          <input id="mpptCurrent" type="number" value="20">
+        </label>
+        <label>ออปติไมเซอร์
+          <select id="optimizerMode">
+            <option value="none">ไม่ใช้</option>
+            <option value="optional">พิจารณาเฉพาะจุดเงาบัง</option>
+            <option value="full">ใช้ทั้งระบบ</option>
+          </select>
+        </label>
+        <label>ระยะ DC เฉลี่ย (ม.)
+          <input id="dcLength" type="number" value="45">
+        </label>
+        <label>ระยะ AC เฉลี่ย (ม.)
+          <input id="acLength" type="number" value="30">
+        </label>
+        <label>เกณฑ์แรงดันตก DC (%)
+          <input id="dcLimit" type="number" step="0.1" value="2">
+        </label>
+        <label>เกณฑ์แรงดันตก AC (%)
+          <input id="acLimit" type="number" step="0.1" value="3">
+        </label>
+      </div>
+      <div class="button-row">
+        <button id="run">คำนวณ</button>
+        <button class="light" id="loadRooftop">โหลด Rooftop 100</button>
+        <button class="light" id="loadFarm">โหลด Farm 1MW</button>
+        <button class="light" id="loadImperial">โหลด Imperial สำโรง</button>
+        <button class="secondary" id="copySummary">คัดลอกสรุป</button>
+      </div>
+    </aside>
+
+    <div class="workspace">
+      <section class="card">
+        <h2>ผลลัพธ์หลัก</h2>
+        <div class="kpi-grid" id="kpis"></div>
+      </section>
+
+      <section class="card">
+        <h2>ตัวอย่างการจัดวาง</h2>
+        <div class="layout-wrap">
+          <div class="roof" id="roof"></div>
+        </div>
+        <div class="legend">
+          <span><i style="background:#1f6fb2"></i>แผงโซลาร์</span>
+          <span><i style="background:rgba(15,118,110,.22); border:1px dashed #0f766e"></i>Walkway / access</span>
+          <span><i style="background:#fff7df; border:1px solid #d69e2e"></i>อินเวอร์เตอร์ / ตู้ AC</span>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>การจัดสตริงและกลุ่มอินเวอร์เตอร์</h2>
+        <div id="stringTable"></div>
+      </section>
+
+      <section class="card">
+        <h2>สายไฟ / อุปกรณ์ป้องกัน / ออปติไมเซอร์</h2>
+        <div id="protectionTable"></div>
+      </section>
+
+      <section class="card">
+        <h2>BOQ เบื้องต้น</h2>
+        <div id="boqTable"></div>
+      </section>
+
+      <section class="card">
+        <h2>ประเด็นที่ต้องตรวจ / รายการตรวจสอบ</h2>
+        <div class="note">สีเขียว = ผ่านเบื้องต้น, สีเหลือง = ต้องรีวิว, สีแดง = ต้องแก้แบบ</div>
+        <div id="issueTable" style="margin-top:10px"></div>
+      </section>
+
+      <section class="card">
+        <h2>สรุปสำหรับคัดลอก</h2>
+        <textarea id="summaryText"></textarea>
+      </section>
+    </div>
+  </main>
+
+  <script>
+    const $ = id => document.getElementById(id);
+    let currentPreset = "custom";
+    const fmt = (n, d = 2) => Number(n).toLocaleString("en-US", { maximumFractionDigits: d, minimumFractionDigits: d });
+    const int = n => Number(n).toLocaleString("en-US", { maximumFractionDigits: 0 });
+    function val(id) { return Number($(id).value); }
+    function status(ok, review = false) {
+      if (!ok) return ["FAIL", "fail"];
+      if (review) return ["REVIEW", "review"];
+      return ["OK", "ok"];
+    }
+    function badge(s) { return `<span class="status ${s[1]}">${s[0]}</span>`; }
+    function setInputs(data) {
+      currentPreset = data.preset || "custom";
+      Object.entries(data).forEach(([k, v]) => {
+        if (k === "preset") return;
+        if ($(k)) $(k).value = v;
+      });
+      generate();
+    }
+    function computeDesign() {
+      const moduleWp = val("moduleWp");
+      const moduleW = val("moduleW");
+      const moduleH = val("moduleH");
+      const moduleArea = moduleW * moduleH;
+      const usableArea = val("usableArea");
+      const reserve = val("areaReserve") / 100;
+      const targetKwp = val("targetKwp");
+      const areaAvailableForModules = usableArea * (1 - reserve);
+      const maxByArea = Math.floor(areaAvailableForModules / moduleArea);
+      const targetModules = Math.round(targetKwp * 1000 / moduleWp);
+      const moduleCount = Math.min(maxByArea, targetModules);
+      const dcKwp = moduleCount * moduleWp / 1000;
+      const invKw = val("invKw");
+      const invCount = Math.max(1, Math.ceil(dcKwp / (invKw * 1.25)));
+      const acKw = invCount * invKw;
+      const dcAc = dcKwp / acKw;
+
+      const voc = val("voc"), vmp = val("vmp"), isc = val("isc"), imp = val("imp");
+      const coeff = Math.abs(val("vocCoeff"));
+      const tmin = val("tmin");
+      const maxDcV = val("maxDcV");
+      const mpptMin = val("mpptMin"), mpptMax = val("mpptMax");
+      const mpptCount = val("mpptCount"), maxMpptCurrent = val("mpptCurrent");
+      let best = null;
+      for (let n = 8; n <= 32; n++) {
+        const stringVocCold = voc * n * (1 + coeff * (25 - tmin));
+        const stringVmp = vmp * n;
+        const ok = stringVocCold < maxDcV && stringVmp >= mpptMin && stringVmp <= mpptMax;
+        if (ok) {
+          const strings = Math.floor(moduleCount / n);
+          const usedModules = strings * n;
+          const waste = moduleCount - usedModules;
+          const score = usedModules - waste * 4 + n;
+          if (!best || score > best.score) best = { n, strings, usedModules, stringVocCold, stringVmp, score };
+        }
+      }
+      if (!best) {
+        best = { n: 0, strings: 0, usedModules: 0, stringVocCold: voc * 24 * (1 + coeff * (25 - tmin)), stringVmp: vmp * 24, score: 0 };
+      }
+      const stringsPerInv = invCount ? best.strings / invCount : 0;
+      const stringsPerMppt = mpptCount ? Math.ceil(stringsPerInv / mpptCount) : 0;
+      const mpptCurrent = stringsPerMppt * imp;
+      const dcDesignCurrent = 1.25 * isc;
+      const dcR = 0.00339;
+      const dcVd = best.stringVmp ? 2 * val("dcLength") * dcDesignCurrent * dcR / best.stringVmp * 100 : 0;
+      const acCurrent = invKw * 1000 / (Math.sqrt(3) * 400);
+      const acDesignCurrent = acCurrent * 1.25;
+      const acR = invKw <= 50 ? 0.000524 : 0.000268;
+      const acVd = Math.sqrt(3) * val("acLength") * acCurrent * acR / 400 * 100;
+      const optimizerMode = $("optimizerMode").value;
+      const optimizerQty = currentPreset === "imperial" ? 680 : optimizerMode === "full" ? best.usedModules : optimizerMode === "optional" ? Math.ceil(best.usedModules * 0.15) : 0;
+      const landFactor = $("projectType").value === "farm" ? 1.8 : 1.35;
+      const landArea = moduleArea * best.usedModules * landFactor;
+      return { moduleWp, moduleW, moduleH, moduleArea, usableArea, targetKwp, areaAvailableForModules, maxByArea, targetModules, moduleCount, dcKwp, invKw, invCount, acKw, dcAc, voc, vmp, isc, imp, maxDcV, mpptMin, mpptMax, mpptCount, maxMpptCurrent, best, stringsPerInv, stringsPerMppt, mpptCurrent, dcDesignCurrent, dcVd, acCurrent, acDesignCurrent, acVd, optimizerMode, optimizerQty, landArea };
+    }
+    function renderKpis(d) {
+      if (currentPreset === "imperial") {
+        const items = [
+          ["ชุดข้อมูล", "Imperial สำโรง"],
+          ["กำลัง DC", "877.20 kWp"],
+          ["กำลัง AC", "750.00 kW"],
+          ["จำนวนแผง", "1,360 / 1,360"],
+          ["สตริง", "SLD ผสม 24/26 แผง"],
+          ["อินเวอร์เตอร์", "150 kW x 5"],
+          ["DC/AC", "1.17"],
+          ["แรงดันตก DC สูงสุด", "3.09% ตามเอกสาร"],
+          ["แรงดันตก AC", "0.87% / 0.94%"],
+        ];
+        $("kpis").innerHTML = items.map(([a,b]) => `<div class="kpi"><span>${a}</span><strong>${b}</strong></div>`).join("");
+        return;
+      }
+      const items = [
+        ["ชุดข้อมูล", currentPreset === "imperial" ? "Imperial สำโรง" : currentPreset],
+        ["กำลัง DC", `${fmt(d.best.usedModules * d.moduleWp / 1000)} kWp`],
+        ["กำลัง AC", `${fmt(d.acKw)} kW`],
+        ["จำนวนแผง", `${int(d.best.usedModules)} / ${int(d.moduleCount)}`],
+        ["สตริง", d.best.n ? `${d.best.strings} สตริง x ${d.best.n} แผง` : "ไม่มีสตริงที่ผ่านเงื่อนไข"],
+        ["อินเวอร์เตอร์", `${d.invKw} kW x ${d.invCount}`],
+        ["DC/AC", fmt(d.dcAc)],
+        ["แรงดันตก DC", `${fmt(d.dcVd)}%`],
+        ["แรงดันตก AC", `${fmt(d.acVd)}%`],
+      ];
+      $("kpis").innerHTML = items.map(([a,b]) => `<div class="kpi"><span>${a}</span><strong>${b}</strong></div>`).join("");
+    }
+    function renderLayout(d) {
+      const roof = $("roof");
+      roof.innerHTML = "";
+      const cols = Math.ceil(Math.sqrt(d.best.usedModules * 1.7));
+      const rows = Math.ceil(d.best.usedModules / cols);
+      const pad = 28, gap = 3;
+      const w = Math.max(8, (700 - pad * 2 - (cols - 1) * gap) / cols);
+      const h = Math.max(13, w * 1.65);
+      const maxRowsVisible = Math.floor((430 - pad * 2) / (h + gap));
+      const shown = Math.min(d.best.usedModules, cols * maxRowsVisible);
+      for (let i = 0; i < shown; i++) {
+        const x = pad + (i % cols) * (w + gap);
+        const y = pad + Math.floor(i / cols) * (h + gap);
+        const m = document.createElement("div");
+        m.className = "module";
+        m.style.left = `${x}px`; m.style.top = `${y}px`; m.style.width = `${w}px`; m.style.height = `${h}px`;
+        if (i % d.best.n === 0) m.textContent = `S${Math.floor(i / d.best.n) + 1}`;
+        roof.appendChild(m);
+      }
+      const walk = document.createElement("div");
+      walk.className = "walkway";
+      walk.style.left = "16px"; walk.style.bottom = "16px"; walk.style.width = "82%"; walk.style.height = "28px";
+      roof.appendChild(walk);
+      const station = document.createElement("div");
+      station.className = "station";
+      station.style.right = "18px"; station.style.bottom = "58px"; station.style.width = "110px"; station.style.height = "58px";
+      station.innerHTML = $("projectType").value === "farm" ? "สถานี<br>INV/TR" : "INV / ตู้<br>AC";
+      roof.appendChild(station);
+    }
+    function table(headers, rows) {
+      return `<table><thead><tr>${headers.map(h => `<th>${h}</th>`).join("")}</tr></thead><tbody>${rows.map(r => `<tr>${r.map(c => `<td>${c}</td>`).join("")}</tr>`).join("")}</tbody></table>`;
+    }
+    function renderTables(d) {
+      const sVoc = status(d.best.stringVocCold < d.maxDcV);
+      const sVmp = status(d.best.stringVmp >= d.mpptMin && d.best.stringVmp <= d.mpptMax);
+      const sMppt = status(d.mpptCurrent < d.maxMpptCurrent);
+      $("stringTable").innerHTML = table(["รายการ", "ผล", "เกณฑ์", "สถานะ"], [
+        ["จำนวนแผง/สตริง", d.best.n || "หาไม่ได้", "ต้องผ่าน Voc และ MPPT", d.best.n ? badge(["OK","ok"]) : badge(["FAIL","fail"])],
+        ["แรงดันใช้งานของสตริง (Vmp)", `${fmt(d.best.stringVmp)} V`, `${d.mpptMin}-${d.mpptMax} V`, badge(sVmp)],
+        ["แรงดันเปิดวงจรตอนอากาศเย็น (Voc cold)", `${fmt(d.best.stringVocCold)} V`, `< ${d.maxDcV} V`, badge(sVoc)],
+        ["Total strings", int(d.best.strings), "ตามจำนวนแผงที่ลงได้", badge(status(d.best.strings > 0))],
+        ["จำนวนสตริง/อินเวอร์เตอร์", fmt(d.stringsPerInv), "ต้องจัดลง MPPT ได้", badge(status(d.stringsPerInv <= d.mpptCount, d.stringsPerInv > d.mpptCount))],
+        ["กระแสต่อ MPPT", `${fmt(d.mpptCurrent)} A`, `< ${d.maxMpptCurrent} A`, badge(sMppt)],
+      ]);
+      if (currentPreset === "imperial") {
+        const imperialRows = [
+          ["กำลังติดตั้งแผง", "877.20 kWp", "645 Wp x 1,360 แผง", "ตรงกับ Concept/SLD"],
+          ["อินเวอร์เตอร์", "150 kW x 5 EA", "กำลัง AC รวม 750 kW", "ตรงกับ SLD"],
+          ["ออปติไมเซอร์", "MERC-1300W-P x 680 EA", "ตรวจการจับคู่แผง/ออปติไมเซอร์", "ต้องเทียบผังสตริงจริง"],
+          ["INV01", "190.92 kWp", "26 PV/ST x 4 ST + 24 PV/ST x 8 ST", "ตรงกับ SLD"],
+          ["INV02", "176.73 kWp", "26 PV/ST x 5 ST + 24 PV/ST x 6 ST", "ตรงกับ SLD"],
+          ["INV03", "190.92 kWp", "26 PV/ST x 4 ST + 24 PV/ST x 8 ST", "ตรงกับ SLD"],
+          ["INV04", "158.67 kWp", "ตรวจจาก SLD/แบบติดตั้ง", "ต้องเทียบ string list จริง"],
+          ["INV05", "159.96 kWp", "ตรวจจาก SLD/แบบติดตั้ง", "ต้องเทียบ string list จริง"],
+          ["สาย AC จากอินเวอร์เตอร์", "1C-120 sq.mm CV-FD / INV", "MCCB 250AT/250AF", "ตรงกับ AC calculation"],
+          ["SMDB1 feeder", "2x(CV-FD 4x1C-240 sq.mm)", "VD 0.87%", "ผ่านเกณฑ์ 5%"],
+          ["SMDB2 feeder", "2x(CV-FD 4x1C-185 sq.mm)", "VD 0.94%", "ผ่านเกณฑ์ 5%"],
+          ["แรงดันตก DC", "สูงสุดที่พบ 3.09%", "จุดที่ต้องรีเช็คเส้นทางสาย/สตริงระยะไกล", "ควรทวนเกณฑ์โครงการ"],
+        ];
+        $("stringTable").innerHTML += `<h3 style="margin:18px 0 8px">Imperial สำโรง - ข้อมูลจริงจากเอกสาร</h3>` +
+          table(["หัวข้อ", "ค่าจากเอกสาร", "หมายเหตุ", "รีเช็ค"], imperialRows);
+      }
+      const dcS = status(d.dcVd <= val("dcLimit"), d.dcVd > val("dcLimit") * 0.8);
+      const acS = status(d.acVd <= val("acLimit"), d.acVd > val("acLimit") * 0.8);
+      const dcCable = currentPreset === "imperial" ? "PV cable 2x1C-6 sq.mm" : d.dcDesignCurrent <= 25 && d.dcVd <= val("dcLimit") ? "PV cable 1C x 6 sq.mm" : "พิจารณา 10 sq.mm หรือปรับเส้นทางสาย";
+      const acCable = currentPreset === "imperial" ? "INV: 1C-120 sq.mm CV-FD; SMDB: 2x240/185 sq.mm" : d.invKw <= 50 ? "Cu 4C x 35 sq.mm + E" : "Cu 4C x 70 sq.mm + E";
+      const invBreaker = currentPreset === "imperial" ? "MCCB 250AT/250AF" : d.invKw <= 50 ? "MCCB 3P 100 A" : "MCCB 3P 200 A";
+      $("protectionTable").innerHTML = table(["หัวข้อ", "แนะนำ", "สถานะ", "หมายเหตุ"], [
+        ["สาย DC", dcCable, badge(dcS), `แรงดันตก ${fmt(d.dcVd)}%`],
+        ["DC isolator", "อุปกรณ์ DC rated ต่ออินเวอร์เตอร์", badge(["REVIEW","review"]), "ต้องเลือกตาม max V/I"],
+        ["DC SPD", d.maxDcV > 1100 ? "Type 2, 1500 Vdc" : "Type 2, 1000/1100 Vdc", badge(["REVIEW","review"]), "ประสานกับ LPS"],
+        ["ฟิวส์สตริง", d.stringsPerMppt > 1 ? "ตรวจกระแสย้อนกลับ (reverse current)" : "อาจไม่จำเป็นถ้า 1 สตริง/MPPT", badge(["REVIEW","review"]), "ดู datasheet แผง/อินเวอร์เตอร์"],
+        ["สาย AC", acCable, badge(acS), `แรงดันตก ${fmt(d.acVd)}%`],
+        ["เบรกเกอร์อินเวอร์เตอร์", invBreaker, badge(["REVIEW","review"]), "ต้องตรวจ IC/Icu"],
+        ["ออปติไมเซอร์", d.optimizerQty ? `${int(d.optimizerQty)} EA` : "ไม่ใช้", badge(["REVIEW","review"]), "ใช้เมื่อมีเงาบัง/ต้อง monitoring ระดับแผง"],
+      ]);
+      $("boqTable").innerHTML = table(["No.", "รายการ", "Specification", "จำนวน"], [
+        [1, "แผงโซลาร์", `${d.moduleWp} Wp`, `${int(d.best.usedModules)} EA`],
+        [2, "อินเวอร์เตอร์", `${d.invKw} kW`, `${d.invCount} EA`],
+        [3, "สาย DC", dcCable, "ตามระยะจริง"],
+        [4, "สาย AC", acCable, "ตามระยะจริง"],
+        [5, "DC SPD/isolator", "ตาม inverter", `${d.invCount} SET`],
+        [6, "AC breaker", invBreaker, `${d.invCount} EA`],
+        [7, "ออปติไมเซอร์", d.optimizerQty ? "ตามโหมดที่เลือก" : "ไม่ใช้", `${int(d.optimizerQty)} EA`],
+        [8, $("projectType").value === "farm" ? "Transformer/RMU" : "AC combiner", $("projectType").value === "farm" ? "ตาม utility" : "ตาม AC capacity", "1 SET"],
+        [9, "Mounting", $("projectType").value === "farm" ? "Ground mount" : "Rooftop mounting", "1 LOT"],
+      ]);
+      const issues = [];
+      if (!d.best.n) issues.push(["FAIL", "ไม่มีจำนวนแผงต่อสตริงที่ผ่านเงื่อนไข", "ลดจำนวนแผง/สตริง หรือเปลี่ยนอินเวอร์เตอร์"]);
+      if (d.best.stringVocCold >= d.maxDcV) issues.push(["FAIL", "Voc cold ของสตริงเกินแรงดัน DC สูงสุดของอินเวอร์เตอร์", "ลดจำนวนแผงต่อสตริง หรือใช้อินเวอร์เตอร์ที่รับแรงดันสูงขึ้น"]);
+      if (d.best.stringVmp < d.mpptMin || d.best.stringVmp > d.mpptMax) issues.push(["FAIL", "Vmp ของสตริงอยู่นอกช่วง MPPT", "ปรับจำนวนแผงต่อสตริง"]);
+      if (d.mpptCurrent >= d.maxMpptCurrent) issues.push(["FAIL", "กระแสต่อ MPPT เกินพิกัด", "ลด string/MPPT หรือเปลี่ยน inverter"]);
+      if (d.dcVd > val("dcLimit")) issues.push(["REVIEW", "แรงดันตกฝั่ง DC เกินเกณฑ์", "เพิ่มขนาดสายหรือลดระยะเส้นทางสาย"]);
+      if (d.acVd > val("acLimit")) issues.push(["REVIEW", "แรงดันตกฝั่ง AC เกินเกณฑ์", "เพิ่มขนาดสายหรือลดระยะเส้นทางสาย"]);
+      if (d.dcAc < 1.0 || d.dcAc > 1.35) issues.push(["REVIEW", "DC/AC ratio อยู่นอกช่วงทั่วไป", "ตรวจ simulation และเป้าหมายโครงการ"]);
+      if (currentPreset === "imperial") {
+        issues.push(["REVIEW", "Imperial ใช้สตริงผสม 24/26 แผงตาม SLD", "ระบบคำนวณทั่วไปเลือกสตริงแบบเดียวเพื่อช่วยเรียน ต้องเทียบกับ SLD จริง"]);
+        issues.push(["REVIEW", "เอกสารคำนวณ DC พบแรงดันตกสูงสุด 3.09%", "ตรวจสตริงที่ระยะไกลและพิจารณาเพิ่มขนาดสาย/ปรับเส้นทางสาย"]);
+        issues.push(["REVIEW", "ออปติไมเซอร์ MERC-1300W-P จำนวน 680 EA ตาม Concept/SLD", "ตรวจการจับคู่ออปติไมเซอร์กับผังสตริงจริง"]);
+      }
+      issues.push(["REVIEW", "กระแสลัดวงจร / ค่า IC,Icu ของเบรกเกอร์ยังไม่ได้คำนวณ", "ต้องขอ fault level และทำ protection coordination"]);
+      issues.push(["REVIEW", "Structure / mounting ยังต้องตรวจจริง", "ตรวจ roof load หรือ soil/foundation"]);
+      $("issueTable").innerHTML = table(["ระดับ", "ประเด็น", "การดำเนินการ"], issues.map(i => [badge([i[0], i[0].toLowerCase() === "fail" ? "fail" : "review"]), i[1], i[2]]));
+    }
+    function renderSummary(d) {
+      const usedKwp = d.best.usedModules * d.moduleWp / 1000;
+      const text = [
+        "สรุปผลจาก Solar Design Generator",
+        `ชุดข้อมูล: ${currentPreset}`,
+        `ประเภทโครงการ: ${$("projectType").value}`,
+        `กำลังติดตั้ง DC: ${fmt(usedKwp)} kWp`,
+        `กำลัง AC: ${fmt(d.acKw)} kW`,
+        `แผงโซลาร์: ${d.moduleWp} Wp x ${int(d.best.usedModules)} แผง`,
+        `อินเวอร์เตอร์: ${d.invKw} kW x ${d.invCount} เครื่อง`,
+        `สตริง: ${currentPreset === "imperial" ? "ตาม SLD ใช้สตริงผสม 24/26 แผงต่อสตริง" : `${d.best.strings} สตริง x ${d.best.n} แผงต่อสตริง`}`,
+        `แรงดันใช้งานสตริง (Vmp): ${fmt(d.best.stringVmp)} V`,
+        `แรงดันเปิดวงจรตอนอากาศเย็น (Voc cold): ${fmt(d.best.stringVocCold)} V`,
+        `กระแสต่อ MPPT: ${fmt(d.mpptCurrent)} A`,
+        `แรงดันตก DC: ${fmt(d.dcVd)}%`,
+        `แรงดันตก AC: ${fmt(d.acVd)}%`,
+        `จำนวนออปติไมเซอร์: ${int(d.optimizerQty)} EA`,
+        `พื้นที่หลังคา/พื้นที่ดินโดยประมาณ: ${fmt(d.landArea)} ตร.ม.`,
+        currentPreset === "imperial" ? "ตรวจเทียบเอกสาร Imperial: Concept/SLD ระบุ 877.20 kWp, แผง 645 Wp x 1,360 แผง, อินเวอร์เตอร์ 150 kW x 5, ออปติไมเซอร์ 680 EA และเอกสาร DC Voltage Drop พบค่าสูงสุด 3.09%." : "",
+        "",
+        "หมายเหตุ: ผลนี้เป็นเครื่องมือช่วยออกแบบเบื้องต้น ต้องตรวจ datasheet จริง มาตรฐาน ข้อกำหนดการไฟฟ้า กระแสลัดวงจร โครงสร้าง และให้วิศวกรรับรองก่อนใช้งานจริง"
+      ].join("\n");
+      $("summaryText").value = text;
+    }
+    function generate() {
+      const d = computeDesign();
+      renderKpis(d);
+      renderLayout(d);
+      renderTables(d);
+      renderSummary(d);
+    }
+    $("run").addEventListener("click", generate);
+    $("runTop").addEventListener("click", () => { currentPreset = "custom"; generate(); });
+    $("loadRooftop").addEventListener("click", () => setInputs({
+      preset: "rooftop100",
+      projectType: "rooftop", usableArea: 850, areaReserve: 28, moduleWp: 550, targetKwp: 100,
+      moduleW: 1.13, moduleH: 2.28, voc: 49.8, vmp: 41.8, isc: 14.0, imp: 13.16, vocCoeff: -0.0028, tmin: 15,
+      invKw: 50, maxDcV: 1100, mpptMin: 200, mpptMax: 1000, mpptCount: 5, mpptCurrent: 20,
+      dcLength: 45, acLength: 30, optimizerMode: "none"
+    }));
+    $("loadFarm").addEventListener("click", () => setInputs({
+      preset: "farm1mw",
+      projectType: "farm", usableArea: 12000, areaReserve: 18, moduleWp: 550, targetKwp: 1030,
+      moduleW: 1.13, moduleH: 2.28, voc: 49.8, vmp: 41.8, isc: 14.0, imp: 13.16, vocCoeff: -0.0028, tmin: 15,
+      invKw: 100, maxDcV: 1500, mpptMin: 500, mpptMax: 1500, mpptCount: 9, mpptCurrent: 20,
+      dcLength: 80, acLength: 40, optimizerMode: "optional"
+    }));
+    $("loadImperial").addEventListener("click", () => setInputs({
+      preset: "imperial",
+      projectType: "rooftop",
+      usableArea: 6500,
+      areaReserve: 35,
+      moduleWp: 645,
+      moduleW: 1.30,
+      moduleH: 2.38,
+      targetKwp: 877.20,
+      voc: 53.5,
+      vmp: 44.0,
+      isc: 18.5,
+      imp: 17.0,
+      vocCoeff: -0.0028,
+      tmin: 15,
+      invKw: 150,
+      maxDcV: 1500,
+      mpptMin: 500,
+      mpptMax: 1500,
+      mpptCount: 9,
+      mpptCurrent: 30,
+      dcLength: 145,
+      acLength: 30,
+      dcLimit: 3,
+      acLimit: 5,
+      optimizerMode: "full"
+    }));
+    $("copySummary").addEventListener("click", async () => {
+      await navigator.clipboard.writeText($("summaryText").value);
+      alert("คัดลอกสรุปแล้ว");
+    });
+    document.querySelectorAll("input, select").forEach(el => el.addEventListener("change", generate));
+    generate();
+  </script>
+</body>
+</html>
